@@ -1,8 +1,9 @@
 import { Snake, DIRECTIONS } from './Snake.js';
 import { Food } from './Food.js';
-import { LEVEL_1_MAP } from './Map.js';
+import { LEVEL_1_MAP, LEVEL_2_MAP, LEVEL_3_MAP, LEVEL_4_MAP, LEVEL_5_MAP, LEVEL_6_MAP } from './Map.js';
 
 
+const mapList = [LEVEL_1_MAP, LEVEL_2_MAP, LEVEL_3_MAP, LEVEL_4_MAP, LEVEL_5_MAP, LEVEL_6_MAP];
 export class LevelMode {
   constructor(canvas, ctx) {
     this.canvas = canvas;
@@ -13,10 +14,11 @@ export class LevelMode {
     this.tileSize = 20;
 
     this.currentLevel = 1;
+    this.maxLevel = 6;
     this.targetFoodCount = 3; // 第1关：吃3个食物
     this.foodEaten = 0;
 
-    this.map = LEVEL_1_MAP; // 第1关地图
+    this.map = mapList[1]; // 第1关地图
 
     this.snake = new Snake(this.gridWidth, this.gridHeight, 3, 3, this.map);
     this.food = null;
@@ -111,7 +113,7 @@ export class LevelMode {
   nextLevel() {
     this.currentLevel++; // 进入下一关
 
-    this.map = LEVEL_1_MAP; // 暂时复用第1关地图，后续可换成 LEVEL_2_MAP
+    this.map = mapList[this.currentLevel - 1]
     this.levelCleared = false;
     this.targetFoodCount = 3 + (this.currentLevel - 1) * 2; // 可选：每关目标递增
     this.reset(); // 重置蛇、食物、游戏状态
@@ -211,7 +213,7 @@ export class LevelMode {
       25
     );
     ctx.fillText(
-      `Level: ${this.currentLevel}/8`,
+      `Level: ${this.currentLevel}/${this.maxLevel}`,
       this.canvas.width - 10,
       45
     );
@@ -227,19 +229,22 @@ export class LevelMode {
         this.canvas.height / 2 - 30
       );
 
-      // 🆕 绘制 "下一关" 按钮（矩形 + 文字）
-      const btn = this.button;
-      ctx.fillStyle = '#4CAF50'; // 按钮背景绿色
-      ctx.fillRect(btn.x, btn.y, btn.width, btn.height);
+      if (this.currentLevel < this.maxLevel) {
+        // 🆕 绘制 "下一关" 按钮（矩形 + 文字）
+        const btn = this.button;
+        ctx.fillStyle = '#4CAF50'; // 按钮背景绿色
+        ctx.fillRect(btn.x, btn.y, btn.width, btn.height);
 
-      ctx.fillStyle = '#FFFFFF'; // 按钮文字白色
-      ctx.font = '18px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText(
-        'Next Level',
-        btn.x + btn.width / 2,
-        btn.y + btn.height / 2 + 6 // 文字垂直居中微调
-      );
+        ctx.fillStyle = '#FFFFFF'; // 按钮文字白色
+        ctx.font = '18px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(
+          'Next Level',
+          btn.x + btn.width / 2,
+          btn.y + btn.height / 2 + 6 // 文字垂直居中微调
+        );
+      }
+
     }
   }
 

@@ -64,7 +64,7 @@ export class Food {
       );
 
       // 2. 可选检测：是否与墙壁重叠（只有传入了 map 才检测！）
-      const isOnWall = map ? map[newpos.y][newpos.x] === 1 : false;
+      const isOnWall = map ? map[newpos.y][newpos.x] !== 0 : false;
 
       // 只有在不撞蛇、不撞墙时才认为是合法位置
       validPosition = !isOnSnake && !isOnWall;
