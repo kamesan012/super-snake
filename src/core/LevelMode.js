@@ -26,6 +26,14 @@ export class LevelMode {
     this.moveInterval = 200; // 每 200ms 移动一次，约每秒 5 次，可调整
     this.lastMoveTime = 0;   // 上一次移动的时间戳
 
+    this.levelCleared = false;
+    this.button = {
+      x: 130,   // (400 - 140) / 2 ≈ 130，水平居中
+      y: 320,   // 留出上方空间给 Level Clear 文字和其他内容，按钮放在靠下方
+      width: 140,
+      height: 40,
+    };
+
     this.setupFood(); // 初始化食物
     this.setupInput();
   }
@@ -47,6 +55,7 @@ export class LevelMode {
 
   setupInput() {
     document.addEventListener('keydown', this.handleKeyDown.bind(this));
+    document.addEventListener('click', this.handleClick.bind(this));
   }
 
   /**
@@ -83,6 +92,31 @@ export class LevelMode {
     }
   }
 
+  handleClick(event) {
+    if (!this.levelCleared) return; // 只有通关后才响应按钮点击
+
+    const rect = this.canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    const btn = this.button;
+    if (
+      x >= btn.x && x <= btn.x + btn.width &&
+      y >= btn.y && y <= btn.y + btn.height
+    ) {
+      this.nextLevel(); // 🆕 点击按钮，进入下一关
+    }
+  }
+
+  nextLevel() {
+    this.currentLevel++; // 进入下一关
+
+    this.map = LEVEL_1_MAP; // 暂时复用第1关地图，后续可换成 LEVEL_2_MAP
+    this.levelCleared = false;
+    this.targetFoodCount = 3 + (this.currentLevel - 1) * 2; // 可选：每关目标递增
+    this.reset(); // 重置蛇、食物、游戏状态
+  }
+
   update(currentTime) {
     if (!this.running || !this.snake.isAlive()) {
       this.running = false;
@@ -107,7 +141,8 @@ export class LevelMode {
 
       // 检测是否通关
       if (this.foodEaten >= this.targetFoodCount) {
-        this.running = false; // 暂时结束，可扩展为进入下一关
+        this.running = false; // 停止游戏逻辑更新
+        this.levelCleared = true; // 🆕 标记为“已通关”，用于显示按钮
         console.log('🎉 Level Clear!');
       }
 
@@ -121,6 +156,7 @@ export class LevelMode {
     this.food = null;
     this.running = true;
     this.lastMoveTime = 0;
+    this.foodEaten = 0;
     this.setupFood();
   }
 
@@ -179,6 +215,32 @@ export class LevelMode {
       this.canvas.width - 10,
       45
     );
+
+    if (this.levelCleared) {
+      // 🎉 显示 Level Clear 文字
+      ctx.fillStyle = '#00FF00'; // 绿色表示成功
+      ctx.font = '32px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(
+        '🎉 Level Clear!',
+        this.canvas.width / 2,
+        this.canvas.height / 2 - 30
+      );
+
+      // 🆕 绘制 "下一关" 按钮（矩形 + 文字）
+      const btn = this.button;
+      ctx.fillStyle = '#4CAF50'; // 按钮背景绿色
+      ctx.fillRect(btn.x, btn.y, btn.width, btn.height);
+
+      ctx.fillStyle = '#FFFFFF'; // 按钮文字白色
+      ctx.font = '18px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(
+        'Next Level',
+        btn.x + btn.width / 2,
+        btn.y + btn.height / 2 + 6 // 文字垂直居中微调
+      );
+    }
   }
 
   isRunning() {

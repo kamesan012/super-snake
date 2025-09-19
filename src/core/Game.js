@@ -23,7 +23,6 @@ export class Game {
    * 初始化游戏：根据模式创建对应模式实例
    */
   init() {
-    // 根据 modeType 创建不同的游戏模式（目前只处理 endless）
     switch (this.modeType) {
       case 'endless':
         this.mode = new EndlessMode(this.canvas, this.ctx);
